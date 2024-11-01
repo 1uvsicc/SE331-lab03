@@ -1,8 +1,14 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+import HomeView from '../views/HomeView.vue';
 import PassengerDetailsView from '../views/PassengerDetailsView.vue';
 import AirlineDetailsView from '../views/AirlineDetailsView.vue';
-import NotFoundView from '../views/NotFoundView.vue'; 
+import NotFoundView from '../views/NotFoundView.vue';
+import Resource from '@/views/Resource.vue'; // 确保您有这个组件
+import nprogress from 'nprogress';
+import 'nprogress/nprogress.css';
+import axios from 'axios';
+import { usePassengerStore } from '@/stores/store';
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -14,15 +20,31 @@ const router = createRouter({
     {
       path: '/about',
       name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
       component: () => import('../views/AboutView.vue'),
     },
     {
       path: '/passengers/:id',
       name: 'passengerDetails',
       component: PassengerDetailsView,
+      beforeEnter: async (to, from, next) => {
+        
+        
+        const passengerStore = usePassengerStore();
+        
+        try {
+          const response = await axios.get(`https://api.instantwebtools.net/v1/passenger/${to.params.id}`);
+          passengerStore.setPassenger(response.data);
+          next();
+        } catch (error) {
+          console.error('Failed to fetch passenger details:', error);
+          if (error.response && error.response.status === 404) {
+            console.log("Navigating to Resource component due to 404 error");
+            next({ name: 'resource' }); 
+          } else {
+            next({ name: 'not-found' }); 
+          }
+        }
+      },
     },
     {
       path: '/airlines/:id',
@@ -30,12 +52,34 @@ const router = createRouter({
       component: AirlineDetailsView,
     },
     {
+      path: '/passengers/111111',
+      name: 'resource',
+      component: Resource, 
+    },
+    {
       path: '/:catchAll(.*)',
       name: 'not-found',
-      component: NotFoundView,
+      component: NotFoundView, 
     },
   ],
-  
-})
+  scrollBehavior(to, from, savedPosition) {
+    
+    console.log('Saved Position:',savedPosition);  
+   if (savedPosition) {
+     return savedPosition
+   } else {
+     return { behavior: 'auto',top: 0 }
+   }
+      
+     }
+});
 
-export default router
+router.beforeEach(() => {
+  nprogress.start();
+});
+
+router.afterEach(() => {
+  nprogress.done();
+});
+
+export default router;

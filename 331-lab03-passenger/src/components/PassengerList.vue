@@ -53,6 +53,8 @@ export default {
     const jumpPage = ref(0);
     const selectedPassenger = ref(null);
     const router = useRouter();
+   
+
     const fetchPassengers = async (page) => {
       try {
         const response = await axios.get(`https://api.instantwebtools.net/v1/passenger?page=${page}&size=10`);
@@ -80,14 +82,6 @@ export default {
       }
     };
 
-   // const openPassengerDetails = async (id) => {
-      //try {
-        //const response = await axios.get(`https://api.instantwebtools.net/v1/passenger/${id}`);
-        //selectedPassenger.value = response.data;
-    // } catch (error) {
-     // console.error('Failed to fetch passenger details:', error);
-     // }
-    //};
    const openPassengerDetails = (id) => {
       // 使用 router.push 方法导航到 PassengerDetailsView 组件，并传递乘客 ID 作为参数
       
