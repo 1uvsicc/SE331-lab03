@@ -6,7 +6,7 @@ import NotFoundView from '../views/NotFoundView.vue';
 import Resource from '@/views/Resource.vue'; // 确保您有这个组件
 import nprogress from 'nprogress';
 import 'nprogress/nprogress.css';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { usePassengerStore } from '@/stores/store';
 
 const router = createRouter({
@@ -32,15 +32,21 @@ const router = createRouter({
         const passengerStore = usePassengerStore();
         
         try {
-          const response = await axios.get(`https://api.instantwebtools.net/v1/passenger/${to.params.id}`);
+          const response = await axios.get(`https://api.instantwebtools.net/v1/passenger/${to.params.id}`); 
           passengerStore.setPassenger(response.data);
           next();
-        } catch (error) {
-          console.error('Failed to fetch passenger details:', error);
-          if (error.response && error.response.status === 404) {
-            console.log("Navigating to Resource component due to 404 error");
-            next({ name: 'resource' }); 
+        } catch (error) { // 使用 'any' 类型来允许类型守卫
+          if (typeof error === 'object' && error !== null && 'response' in error) {
+            const axiosError = error as AxiosError;
+            console.error('Failed to fetch passenger details:', axiosError);
+            if (axiosError.response && axiosError.response.status === 404) {
+              console.log("Navigating to Resource component due to 404 error");
+              next({ name: 'resource' }); 
+            } else {
+              next({ name: 'not-found' }); 
+            }
           } else {
+            console.error('Non-Axios error caught:', error);
             next({ name: 'not-found' }); 
           }
         }
