@@ -30,16 +30,15 @@
     <p v-else-if="error">An error occurred. Please try again later.</p>
   </div>
 </template>
+
 <script>
 import { ref, defineComponent, computed } from 'vue';
-//import axios from 'axios';
-import {  useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { usePassengerStore } from '@/stores/store';
+
 export default defineComponent({
   setup() {
-    //const route = useRoute();
     const router = useRouter();
-    //const passenger = ref(null);
     const editedPassenger = ref({});
     const isEditing = ref(false);
     const showFlashMessage = ref(false);
@@ -48,28 +47,9 @@ export default defineComponent({
     const passengerStore = usePassengerStore();
     const passenger = computed(() => passengerStore.passenger);
 
-    
-
-   // const fetchPassengerDetails = async () => {
-      //try {
-    //    const response = await axios.get(`https://api.instantwebtools.net/v1/passenger/${route.params.id}`);  
-   //     passenger.value = response.data;
-  //      editedPassenger.value = { ...response.data };
-  //      loading.value = false; 
-//      } catch (error) {
- //       console.error('Failed to fetch passenger details:', error);
- //       loading.value = false;
- //       if (error.response && error.response.status === 404) {
- //         error.value = "not-found";
- //       } else {
- //         error.value = true;
- //       }
- //     }
- //   };
     const toggleEdit = () => {
       isEditing.value = !isEditing.value;
       if (!isEditing.value) {
-        // Reset editedPassenger when canceling edit
         editedPassenger.value = { ...passenger.value };
       }
     };
@@ -84,13 +64,10 @@ export default defineComponent({
     const goToAirlineDetails = () => {
       if (passenger.value && passenger.value.airline.length > 0) {
         const airlineId = passenger.value.airline[0]._id;
-        router.push({ name: 'airlineDetails', params: { id: airlineId } });
+        router.push({ name: 'airlineDetails', params: { id: airlineId }, query: { passengerId: passenger.value._id } });
+        //router.push({ name: 'airlineDetails', params: { id: airlineId } });
       }
     };
-
-    //onMounted(() => {
- //     fetchPassengerDetails();
-  //  });
 
     return {
       passenger,
@@ -106,6 +83,7 @@ export default defineComponent({
   }
 });
 </script>
+
 <style>
 .flash-message {
   position: fixed;

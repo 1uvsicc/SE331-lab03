@@ -8,8 +8,9 @@
       </li>
     </ul>
     <button @click="handlePageChange(-1)" :disabled="currentPage === 0">prev page</button>
+    <span>Current Page: {{ currentPage + 1 }}</span> <!-- 修改这里的 currentPage + 1 -->
     <button @click="handlePageChange(1)" :disabled="currentPage >= totalPages - 1">next page</button>
-    <input type="number" v-model="jumpPage" min="0" :max="totalPages - 1" />
+    <input type="number" v-model="jumpPage" min="1" :max="totalPages" />
     <button @click="jumpToPage">jump to</button>
     <div v-if="selectedPassenger">
       <h2>Passenger Details:</h2>
@@ -50,14 +51,14 @@ export default {
     const passengers = ref([]);
     const currentPage = ref(0);
     const totalPages = ref(0);
-    const jumpPage = ref(0);
+    const jumpPage = ref(1); // 默认从第一页开始，而不是从零
     const selectedPassenger = ref(null);
     const router = useRouter();
    
 
     const fetchPassengers = async (page) => {
       try {
-        const response = await axios.get(`https://api.instantwebtools.net/v1/passenger?page=${page}&size=10`);
+        const response = await axios.get(`https://api.instantwebtools.net/v1/passenger?page=${page - 1}&size=10`); // 调整这里的页数减1
         passengers.value = response.data.data;
         totalPages.value = response.data.totalPages; 
       } catch (error) {
@@ -69,27 +70,24 @@ export default {
       const nextPage = currentPage.value + offset;
       if (nextPage >= 0 && nextPage < totalPages.value) { 
         currentPage.value = nextPage;
-        fetchPassengers(nextPage); 
+        fetchPassengers(nextPage + 1); // 调整这里的页数加1
       }
     };
     const jumpToPage = () => {
-      if (jumpPage.value >= 0 && jumpPage.value < totalPages.value) {
-        currentPage.value = jumpPage.value;
+      if (jumpPage.value >= 1 && jumpPage.value <= totalPages.value) {
+        currentPage.value = jumpPage.value - 1; // 调整这里的页数减1
         fetchPassengers(jumpPage.value);
       } else {
         alert('plz enter right number');
-        jumpPage.value = 0; 
+        jumpPage.value = 1; // 默认跳转第一页，而不是零
       }
     };
 
    const openPassengerDetails = (id) => {
-      // 使用 router.push 方法导航到 PassengerDetailsView 组件，并传递乘客 ID 作为参数
-      
       router.push({ name: 'passengerDetails', params: { id } });
-      
      };
   
-    fetchPassengers(currentPage.value);
+    fetchPassengers(currentPage.value + 1); // 调整这里的页数加1
 
     return {
       passengers,
