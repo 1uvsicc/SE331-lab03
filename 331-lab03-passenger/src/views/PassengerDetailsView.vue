@@ -31,13 +31,13 @@
   </div>
 </template>
 <script>
-import { ref, defineComponent, onMounted,computed } from 'vue';
-import axios from 'axios';
-import { useRoute, useRouter } from 'vue-router';
+import { ref, defineComponent, computed } from 'vue';
+//import axios from 'axios';
+import {  useRouter } from 'vue-router';
 import { usePassengerStore } from '@/stores/store';
 export default defineComponent({
   setup() {
-    const route = useRoute();
+    //const route = useRoute();
     const router = useRouter();
     //const passenger = ref(null);
     const editedPassenger = ref({});
